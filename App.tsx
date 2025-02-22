@@ -7,18 +7,16 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import HomeScreen from "./src/screens/HomeScreen";
 import UploadScreen from './src/screens/UploadScreen';
+import { NativeWindStyleSheet } from "nativewind";
 
 const Stack = createNativeStackNavigator();
 
+NativeWindStyleSheet.setOutput({
+    default: "native",
+});
 
 LogBox.ignoreAllLogs(true);
 Amplify.configure(outputs);
-
-import { signInWithRedirect } from "aws-amplify/auth"
-
-signInWithRedirect({
-    provider: { custom: "MicrosoftEntraIDSAML" }
-})
 
 const App = () => {
     return (
