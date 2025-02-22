@@ -5,6 +5,8 @@ const schema = a.schema({
     .model({
       id: a.id().required(),
       name: a.string().required(),
+      description: a.string(),
+      imageUrl: a.string(),
     })
     .identifier(['id']),
 
