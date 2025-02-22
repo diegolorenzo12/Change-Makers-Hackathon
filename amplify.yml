@@ -1,0 +1,19 @@
+version: 1
+frontend:
+  phases:
+    preBuild:
+      commands:
+        - nvm install 18
+        - npm install -g expo-cli
+    build:
+      commands:
+        - npx ampx pipeline-deploy --branch $AWS_BRANCH --app-id $AWS_APP_ID
+        - npm install
+        - npx expo export -p web
+  artifacts:
+    baseDirectory: dist  # adjust this if your build output folder is different
+    files:
+      - '**/*'
+  cache:
+    paths:
+      - node_modules/**/*
