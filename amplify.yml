@@ -8,9 +8,9 @@ frontend:
     build:
       commands:
         - npm install
-        - npm run build
+        - npx expo export -p web
   artifacts:
-    baseDirectory: web-build  # adjust this if your build output folder is different
+    baseDirectory: dist  # adjust this if your build output folder is different
     files:
       - '**/*'
   cache:
