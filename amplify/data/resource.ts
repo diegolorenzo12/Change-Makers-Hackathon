@@ -5,17 +5,20 @@ const schema = a.schema({
     .model({
       id: a.id().required(),
       name: a.string().required(),
+      description: a.string(),
+      imageUrl: a.string(),
     })
     .identifier(['id']),
 
 })
-  .authorization((allow) => [allow.owner()]);
+  .authorization(allow => [allow.publicApiKey()])
 
 export type Schema = ClientSchema<typeof schema>;
 
 export const data = defineData({
   schema,
   authorizationModes: {
-    defaultAuthorizationMode: "userPool",  // Use Cognito User Pools for authentication
+    defaultAuthorizationMode: 'apiKey',  // Use Cognito User Pools for authentication
+    apiKeyAuthorizationMode: { expiresInDays: 30 }
   },
 });

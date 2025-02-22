@@ -6,14 +6,17 @@
     "android": "expo run:android",
     "ios": "expo run:ios",
     "web": "expo start --web",
-    "build-web": "expo build:web"
-  },
+    "build:css": "tailwindcss -o ./dist/tailwind.css",
+    "build-web": "expo build:web",
+    "build": "expo build:web"
+  }, 
   "dependencies": {
     "@aws-amplify/api": "^6.0.54",
     "@aws-amplify/api-graphql": "^4.4.1",
     "@aws-amplify/auth": "^6.5.2",
     "@aws-amplify/react-native": "^1.1.6",
     "@aws-amplify/ui-react-native": "^2.2.15",
+    "@expo/metro-runtime": "~3.2.3",
     "@expo/vector-icons": "^14.0.3",
     "@react-native-async-storage/async-storage": "^2.0.0",
     "@react-native-community/masked-view": "^0.1.11",
@@ -21,6 +24,7 @@
     "@react-navigation/native": "^6.1.18",
     "@react-navigation/native-stack": "^6.11.0",
     "@react-navigation/stack": "^6.4.1",
+    "autoprefixer": "^10.4.20",
     "aws-amplify": "^6.6.5",
     "axios": "^1.7.7",
     "expo": "~51.0.28",
@@ -28,7 +32,9 @@
     "expo-status-bar": "~1.12.1",
     "lucide-react-native": "^0.475.0",
     "nativewind": "^2.0.11",
+    "postcss": "^8.5.3",
     "react": "18.2.0",
+    "react-dom": "18.2.0",
     "react-native": "0.74.5",
     "react-native-dotenv": "^3.4.11",
     "react-native-gesture-handler": "^2.20.0",
@@ -39,7 +45,8 @@
     "react-native-screens": "^3.34.0",
     "react-native-svg": "^15.11.1",
     "react-native-url-polyfill": "^2.0.0",
-    "react-native-vector-icons": "^10.2.0"
+    "react-native-vector-icons": "^10.2.0",
+    "react-native-web": "~0.19.10"
   },
   "devDependencies": {
     "@aws-amplify/backend": "^1.5.0",
