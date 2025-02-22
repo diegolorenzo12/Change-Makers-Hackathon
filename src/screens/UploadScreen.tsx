@@ -1,11 +1,32 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, Image } from 'react-native';
+import React, { useState, useEffect, useRef } from 'react';
+import { View, Text, TextInput, TouchableOpacity, Image, Dimensions, Button } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Camera } from 'lucide-react-native';
+import { CameraType, useCameraPermissions, CameraView, Camera } from 'expo-camera';
 
 export default function UploadScreen({ navigation }) {
     const [caption, setCaption] = useState('');
     const [image, setImage] = useState(null);
+    const [facing, setFacing] = useState<CameraType>('back');
+    const [permission, requestPermission] = useCameraPermissions();
+    
+    if (!permission) {
+        return <View />;
+    }
+
+    if (!permission.granted) {
+        // Camera permissions are not granted yet.
+        return (
+          <View >
+            <Text >We need your permission to show the camera</Text>
+            <Button onPress={requestPermission} title="grant permission" />
+          </View>
+        );
+    }
+
+    function toggleCameraFacing() {
+        setFacing(current => (current === 'back' ? 'front' : 'back'));
+    }
+
 
     const handleUpload = () => {
         // Here you would typically handle the image upload
@@ -13,28 +34,57 @@ export default function UploadScreen({ navigation }) {
         navigation.goBack();
     };
 
+    // Get the screen width to ensure the image is square
+    const screenWidth = Dimensions.get('window').width;
+
     return (
-        <SafeAreaView className="flex-1 bg-gray-100">
-            <View className="p-4">
-                <TouchableOpacity
-                    className="h-60 bg-gray-200 rounded-lg items-center justify-center mb-4"
-                    onPress={() => {
-                        // Here you would typically implement image picker
-                        console.log('Pick image');
-                    }}
-                >
-                    {image ? (
-                        <Image source={{ uri: image }} className="w-full h-full rounded-lg" />
-                    ) : (
-                        <View className="items-center">
-                            <Camera size={48} color="#9CA3AF" />
-                            <Text className="text-gray-500 mt-2">Tap to select a photo</Text>
+        <SafeAreaView style={{ flex: 1, backgroundColor: '#f3f4f6' }}>
+                            <View 
+                    style={{
+                        flex: 1,
+                        justifyContent: 'center'    
+                    }}>
+                    <CameraView 
+                        style={{
+                            flex: 1,
+                            }} 
+                        facing={facing}>
+
+                        <View 
+                            style={{
+                                flex: 1,
+                                flexDirection: 'row',
+                                backgroundColor: 'transparent',
+                                margin: 64,
+                            }}>
+                        <TouchableOpacity 
+                            style={{
+                                flex: 1,
+                                alignSelf: 'flex-end',
+                                alignItems: 'center',
+                            }} 
+                            onPress={toggleCameraFacing}>
+                            <Text 
+                                style={{
+                                    fontSize: 24,
+                                    fontWeight: 'bold',
+                                    color: 'white',
+                                }}>
+                                    Flip Camera
+                            </Text>
+                        </TouchableOpacity>
                         </View>
-                    )}
-                </TouchableOpacity>
+                    </CameraView>
+                </View>
+            <View style={{ padding: 16 }}>
 
                 <TextInput
-                    className="bg-white p-4 rounded-lg mb-4"
+                    style={{
+                        backgroundColor: 'white',
+                        padding: 16,
+                        borderRadius: 12,
+                        marginBottom: 16,
+                    }}
                     placeholder="Write a caption..."
                     value={caption}
                     onChangeText={setCaption}
@@ -42,10 +92,15 @@ export default function UploadScreen({ navigation }) {
                 />
 
                 <TouchableOpacity
-                    className="bg-blue-500 p-4 rounded-lg items-center"
+                    style={{
+                        backgroundColor: '#3b82f6',
+                        padding: 16,
+                        borderRadius: 12,
+                        alignItems: 'center',
+                    }}
                     onPress={handleUpload}
                 >
-                    <Text className="text-white font-semibold">Upload Post</Text>
+                    <Text style={{ color: 'white', fontWeight: '600' }}>Upload Post</Text>
                 </TouchableOpacity>
             </View>
         </SafeAreaView>
