@@ -4,7 +4,7 @@ frontend:
     preBuild:
       commands:
         - nvm install 18
-        - nvm use 18
+        - npm install -g expo-cli
     build:
       commands:
         - npm install
