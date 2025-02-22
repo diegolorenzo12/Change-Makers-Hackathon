@@ -4,7 +4,11 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import Post from '../components/Post';
 import ChallengeCard from '../components/ChallengeCard';
 
-const { width, height } = Dimensions.get('window');  // Get screen dimensions
+// Get screen dimensions
+const { width, height } = Dimensions.get('window');
+
+// Define if it's desktop or mobile
+const isDesktop = width >= 1024; // You can adjust this threshold as per your needs
 
 const todaysChallenge = {
     title: "Park Clean-up Challenge",
@@ -61,9 +65,9 @@ export default function HomeScreen({ navigation }) {
     };
 
     return (
-        <SafeAreaView style={styles.container}>
+        <SafeAreaView style={[styles.container, isDesktop && styles.desktopCardWrapper]}>
             <ScrollView contentContainerStyle={styles.scrollContainer}>
-                <View style={styles.challengeCardWrapper}>
+                <View style={[styles.challengeCardWrapper]}>
                     <ChallengeCard challenge={todaysChallenge} />
                 </View>
                 {posts.map(post => (
@@ -95,6 +99,11 @@ const styles = StyleSheet.create({
     },
     challengeCardWrapper: {
         padding: 16,
+        width: '100%',  // Full width for mobile
+    },
+    desktopCardWrapper: {
+        width: '50%',  // 2/4 of the screen width on desktop
+        alignSelf: 'center',  // Center the card on desktop
     },
     uploadButton: {
         position: 'absolute',
