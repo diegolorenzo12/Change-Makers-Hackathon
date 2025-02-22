@@ -1,15 +1,22 @@
 import { type ClientSchema, a, defineData } from '@aws-amplify/backend';
+import { createPost } from "../functions/create-post/resource"; // Adjust the function import path
 
 const schema = a.schema({
-  Post: a
-    .model({
-      id: a.id().required(),
-      name: a.string().required(),
-      description: a.string(),
-      imageUrl: a.string(),
-    })
-    .identifier(['id']),
+  Post: a.model({
+    id: a.id().required(),
+    title: a.string().required(),
+    imageKey: a.string().required(),
+    createdAt: a.datetime().required(),
+  }),
 
+  createPost: a
+    .mutation()
+    .arguments({
+      title: a.string().required(),
+      imageBase64: a.string().required()
+    })
+    .returns(a.ref('Post'))
+    .handler(a.handler.function(createPost)),
 })
   .authorization(allow => [allow.publicApiKey()])
 

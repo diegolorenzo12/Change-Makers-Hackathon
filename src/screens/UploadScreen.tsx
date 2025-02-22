@@ -2,6 +2,11 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Camera } from 'lucide-react-native';
+import { generateClient } from 'aws-amplify/api';
+import type { Schema } from '@/amplify/data/resource';
+
+const client = generateClient<Schema>();
+
 
 export default function UploadScreen({ navigation }) {
     const [caption, setCaption] = useState('');

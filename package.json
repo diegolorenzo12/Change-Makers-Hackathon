@@ -9,7 +9,7 @@
     "build:css": "tailwindcss -o ./dist/tailwind.css",
     "build-web": "expo build:web",
     "build": "expo build:web"
-  }, 
+  },
   "dependencies": {
     "@aws-amplify/api": "^6.0.54",
     "@aws-amplify/api-graphql": "^4.4.1",
@@ -45,7 +45,8 @@
     "react-native-svg": "^15.11.1",
     "react-native-url-polyfill": "^2.0.0",
     "react-native-vector-icons": "^10.2.0",
-    "react-native-web": "~0.19.10"
+    "react-native-web": "~0.19.10",
+    "uuid": "^11.1.0"
   },
   "devDependencies": {
     "@aws-amplify/backend": "^1.5.0",
