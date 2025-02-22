@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
-import { View, ScrollView, TouchableOpacity, Text } from 'react-native';
+import { View, ScrollView, TouchableOpacity, Text, StyleSheet, Dimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Post from '../components/Post';
 import ChallengeCard from '../components/ChallengeCard';
+
+const { width, height } = Dimensions.get('window');  // Get screen dimensions
 
 const todaysChallenge = {
     title: "Park Clean-up Challenge",
@@ -59,9 +61,9 @@ export default function HomeScreen({ navigation }) {
     };
 
     return (
-        <SafeAreaView className="flex-1 bg-gray-50">
-            <ScrollView className="flex-1">
-                <View className="p-4">
+        <SafeAreaView style={styles.container}>
+            <ScrollView contentContainerStyle={styles.scrollContainer}>
+                <View style={styles.challengeCardWrapper}>
                     <ChallengeCard challenge={todaysChallenge} />
                 </View>
                 {posts.map(post => (
@@ -75,10 +77,40 @@ export default function HomeScreen({ navigation }) {
             </ScrollView>
             <TouchableOpacity
                 onPress={() => navigation.navigate('Upload')}
-                className="absolute bottom-6 right-6 bg-green-500 rounded-full p-4"
+                style={styles.uploadButton}
             >
-                <Text className="text-white text-2xl">+</Text>
+                <Text style={styles.uploadButtonText}>+</Text>
             </TouchableOpacity>
         </SafeAreaView>
     );
 }
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        backgroundColor: '#f8f8f8',
+    },
+    scrollContainer: {
+        paddingBottom: 100,  // Some extra padding for the button at the bottom
+    },
+    challengeCardWrapper: {
+        padding: 16,
+    },
+    uploadButton: {
+        position: 'absolute',
+        bottom: 24,
+        right: 24,
+        backgroundColor: '#28a745',
+        borderRadius: 50,
+        padding: 16,
+        width: 60, // Width for circular button
+        height: 60, // Height for circular button
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    uploadButtonText: {
+        color: '#ffffff',
+        fontSize: 24,
+        fontWeight: 'bold',
+    },
+});
