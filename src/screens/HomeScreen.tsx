@@ -3,6 +3,7 @@ import { View, ScrollView, TouchableOpacity, Text, StyleSheet, Dimensions } from
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Post from '../components/Post';
 import ChallengeCard from '../components/ChallengeCard';
+import Icon from 'react-native-vector-icons/FontAwesome'; // Import for the heart icon
 
 // Get screen dimensions
 const { width, height } = Dimensions.get('window');
@@ -20,8 +21,8 @@ const todaysChallenge = {
 
 const initialPosts = [
     {
-        id: '1',
-        imageUrl: 'https://picsum.photos/400/400',
+        id: '1', 
+        imageUrl: require('../../assets/kids.jpeg'),
         challengeTitle: "Park Clean-up Challenge",
         caption: "Spent my morning cleaning Thompson Park! Found lots of plastic bottles - all properly recycled now! 💚♻️",
         author: {
@@ -32,10 +33,11 @@ const initialPosts = [
         timeAgo: "2 hours ago",
         impact: "2kg waste collected",
         category: "Clean Environment",
+        isLiked: false, // Add isLiked state
     },
     {
         id: '2',
-        imageUrl: 'https://picsum.photos/400/400?random=1',
+        imageUrl: require('../../assets/planting.jpg'),
         challengeTitle: "Plant a Seedling",
         caption: "Just planted my first tomato seedling! Can't wait to see it grow 🌱🍅",
         author: {
@@ -46,18 +48,20 @@ const initialPosts = [
         timeAgo: "5 hours ago",
         impact: "1 plant added",
         category: "Urban Gardening",
+        isLiked: false, // Add isLiked state
     },
 ];
 
 export default function HomeScreen({ navigation }) {
     const [posts, setPosts] = useState(initialPosts);
 
-    const handleVote = (postId: string, increment: boolean) => {
+    const handleVote = (postId: string) => {
         setPosts(posts.map(post => {
             if (post.id === postId) {
                 return {
                     ...post,
-                    votes: post.votes + (increment ? 1 : -1),
+                    votes: post.isLiked ? post.votes - 1 : post.votes + 1, // Increment or decrement votes based on whether it is liked
+                    isLiked: !post.isLiked, // Toggle the like state
                 };
             }
             return post;
@@ -74,8 +78,12 @@ export default function HomeScreen({ navigation }) {
                     <Post
                         key={post.id}
                         post={post}
-                        onUpvote={() => handleVote(post.id, true)}
-                        onDownvote={() => handleVote(post.id, false)}
+                        onUpvote={() => handleVote(post.id)} // Only handle the upvote
+                        renderHeartIcon={
+                            <TouchableOpacity onPress={() => handleVote(post.id)} style={styles.heartButton}>
+                                <Icon name="heart" size={30} color={post.isLiked ? 'green' : '#ccc'} />
+                            </TouchableOpacity>
+                        }
                     />
                 ))}
             </ScrollView>
@@ -109,7 +117,7 @@ const styles = StyleSheet.create({
         position: 'absolute',
         bottom: 24,
         right: 24,
-        backgroundColor: '#28a745',
+        backgroundColor: '#85da59',
         borderRadius: 50,
         padding: 16,
         width: 60, // Width for circular button
@@ -121,5 +129,9 @@ const styles = StyleSheet.create({
         color: '#ffffff',
         fontSize: 24,
         fontWeight: 'bold',
+    },
+    heartButton: {
+        marginTop: 10,
+        alignItems: 'center',
     },
 });
