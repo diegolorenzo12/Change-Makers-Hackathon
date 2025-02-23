@@ -8,20 +8,25 @@ const client = generateClient<Schema>();
 
 
 export const handler: Handler = async (event, context) => {
-    const { title, imageBase64 } = JSON.parse(event.body);
+    const { title, imageBase64 } = event.arguments;
 
     // Generate a unique key for the image
     const imageKey = `images/${uuid()}.jpg`;
 
     try {
         // Upload image to S3 using Amplify Storage (new API)
-        const uploadResult = await uploadData({
-            key: imageKey,
-            data: Buffer.from(imageBase64, 'base64'),
-            options: {
-                contentType: 'image/jpeg',
-            },
-        }).result;
+        try {
+            const uploadResult = await uploadData({
+                key: imageKey,
+                data: Buffer.from(imageBase64, 'base64'),
+                options: {
+                    contentType: 'image/jpeg',
+                    accessLevel: 'guest'
+                }
+            }).result;
+        } catch (error) {
+            throw new Error(`Failed to upload image to S3: ${error}`);
+        }
 
         const postId = uuid();
         const createdAt = new Date().toISOString();
@@ -29,19 +34,12 @@ export const handler: Handler = async (event, context) => {
             id: postId,
             title,
             imageKey,
-            createdAt,
+            createdAt
         });
 
-
-        return {
-            statusCode: 200,
-            body: JSON.stringify(newPost),
-        };
+        return newPost;
     } catch (error) {
-        console.error('Error:', error);
-        return {
-            statusCode: 500,
-            body: JSON.stringify({ message: 'Internal Server Error' }),
-        };
+        //console.error('Error:', error);
+        throw error;
     }
 };

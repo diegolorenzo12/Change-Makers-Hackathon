@@ -13,6 +13,7 @@ const Stack = createNativeStackNavigator();
 LogBox.ignoreAllLogs(true);
 Amplify.configure(outputs);
 
+
 const App = () => {
     const rootRef = useRef(null);
 
@@ -29,10 +30,10 @@ const App = () => {
                 document.head.removeChild(link);
             };
         }
-    }, []); 
+    }, []);
 
     return (
-        <View ref={rootRef} style={{flex: 1, backgroundColor: 'white' }}>
+        <View ref={rootRef} style={{ flex: 1, backgroundColor: 'white' }}>
             <StatusBar barStyle="light-content" backgroundColor="white" />
             <SafeAreaView style={{ flex: 1, backgroundColor: 'white' }}>
                 <NavigationContainer>

@@ -42,7 +42,7 @@ const initialPosts = [
         timeAgo: "5 hours ago",
         impact: "1 plant added",
         category: "Urban Gardening",
-    },
+    }
 ];
 
 export default function HomeScreen({ navigation }) {

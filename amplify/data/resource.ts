@@ -9,7 +9,7 @@ const schema = a.schema({
     createdAt: a.datetime().required(),
   }),
 
-  createPost: a
+  createPostWithImage: a
     .mutation()
     .arguments({
       title: a.string().required(),
