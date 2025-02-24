@@ -1,5 +1,4 @@
 import { type ClientSchema, a, defineData } from '@aws-amplify/backend';
-import { createPost } from "../functions/create-post/resource"; // Adjust the function import path
 
 const schema = a.schema({
   Post: a.model({
@@ -7,18 +6,28 @@ const schema = a.schema({
     title: a.string().required(),
     imageKey: a.string().required(),
     createdAt: a.datetime().required(),
+    author: a.customType({
+      name: a.string(),
+      avatar: a.string()
+    }),
+    votes: a.integer().default(0)
   }),
 
-  createPostWithImage: a
-    .mutation()
-    .arguments({
-      title: a.string().required(),
-      imageBase64: a.string().required()
-    })
-    .returns(a.ref('Post'))
-    .handler(a.handler.function(createPost)),
+  generateTask: a.generation({
+    aiModel: a.ai.model('Claude 3 Haiku'),
+    systemPrompt: 'You are an AI assistant that generates environmental tasks. Each task should be simple, actionable, and impactful.',
+  })
+    .arguments({})
+    .returns(
+      a.customType({
+        title: a.string(),
+        helps: a.string(),
+        description: a.string(),
+        impact: a.string(),
+      })
+    )
 })
-  .authorization(allow => [allow.publicApiKey()])
+  .authorization(allow => [allow.publicApiKey(), allow.guest()])
 
 export type Schema = ClientSchema<typeof schema>;
 

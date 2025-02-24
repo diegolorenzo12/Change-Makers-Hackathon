@@ -10,8 +10,5 @@ export const auth = defineAuth({
         email: {
             verificationEmailSubject: 'Welcome! Verify your email!',
         },
-    },
-    userAttributes: {
-        // Define user attributes if needed
-    },
+    }
 });

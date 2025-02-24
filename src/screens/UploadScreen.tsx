@@ -1,9 +1,12 @@
-import React, { useState, useRef } from 'react';
-import { View, Text, TextInput, TouchableOpacity, Image, Dimensions, Alert } from 'react-native';
+import React, { useState, useEffect, useRef } from 'react';
+import { View, Text, TextInput, TouchableOpacity, Image, Dimensions, Button, Alert, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { CameraType, useCameraPermissions, CameraView } from 'expo-camera';
 import { generateClient } from 'aws-amplify/api';
 import type { Schema } from '@/amplify/data/resource';
+import { v4 as uuid } from 'uuid';
+import { uploadData } from 'aws-amplify/storage';
+
 
 const client = generateClient<Schema>();
 
@@ -16,11 +19,16 @@ type CapturedImage = {
 
 export default function UploadScreen({ navigation }) {
     const [caption, setCaption] = useState('');
-    const [image, setImage] = useState<CapturedImage | null>(null);
     const [facing, setFacing] = useState<CameraType>('back');
     const [permission, requestPermission] = useCameraPermissions();
+    const [photoUri, setPhotoUri] = useState<string | null>(null);
     const cameraRef = useRef<CameraView>(null); // Add the correct type
     const [loading, setLoading] = useState(false);
+
+
+    // Check the screen width
+    const { width, height } = Dimensions.get('window');
+    const isDesktop = width >= 1024; // Set the threshold for desktop screen
 
     if (!permission) {
         return <View />;
@@ -52,41 +60,55 @@ export default function UploadScreen({ navigation }) {
                 quality: 0.5, // Reduce quality to decrease buffer size
                 imageType: 'jpg'
             });
-            setImage(photo as CapturedImage); // Type assertion to match CapturedImage type
+            console.log(photo?.uri)
+            if (photo?.uri) {
+                setPhotoUri(photo.uri);
+            } else {
+                console.error('Photo URI is undefined');
+            }
         }
     };
 
     const handleUpload = async () => {
-        if (!image || !caption) {
-            Alert.alert('Error', 'Please capture an image and write a caption.');
+        if (!photoUri) {
+            Alert.alert('Error', 'Please capture an image');
+            return;
+        }
+        if (!caption) {
+            Alert.alert('Error', 'Please write a caption');
             return;
         }
 
         setLoading(true);
 
+        const response = await fetch(photoUri);
+        const blob = await response.blob();
+
         try {
-            // Get the base64 string directly from the captured image
-            const base64 = image.base64; // Use the base64 data from the captured image
+            const imageKey = `images/${uuid()}.jpg`;
 
-            if (!base64) {
-                throw new Error('Failed to get base64 data from the image.');
-            }
+            const uploadResult = await uploadData({
+                key: imageKey,
+                data: blob,
+                options: {
+                    contentType: 'image/jpeg',
+                    accessLevel: 'guest'
+                }
+            }).result;
 
-            // Debugging: Log the base64 string
-            //console.log('Base64 string:', base64);
+            console.log(uploadResult);
 
-            // Call the createPost mutation
-
-            const { data, errors } = await client.mutations.createPostWithImage({
+            const createdAt = new Date().toISOString();
+            const newPost = await client.models.Post.create({
                 title: caption,
-                imageBase64: base64,
-            })
+                imageKey: `public/${imageKey}`,
+                createdAt
+            });
 
-            if (errors) {
-                throw new Error(errors[0].message);
-            }
 
-            if (data) {
+            console.log(newPost)
+
+            if (newPost) {
                 Alert.alert('Success', 'Post created successfully!');
                 navigation.goBack();
             }
@@ -99,35 +121,16 @@ export default function UploadScreen({ navigation }) {
     };
 
     return (
-        <SafeAreaView style={{ flex: 1, backgroundColor: '#f3f4f6' }}>
-            <View style={{ flex: 1, justifyContent: 'center' }}>
-                <CameraView
-                    style={{ flex: 1 }}
-                    facing={facing}
-                    ref={cameraRef}
-                >
-                    <View
-                        style={{
-                            flex: 1,
-                            flexDirection: 'row',
-                            backgroundColor: 'transparent',
-                            margin: 64,
-                        }}
-                    >
-                        <TouchableOpacity
-                            style={{
-                                flex: 1,
-                                alignSelf: 'flex-end',
-                                alignItems: 'center',
-                            }}
-                            onPress={toggleCameraFacing}
-                        >
-                            <Text style={{ fontSize: 24, fontWeight: 'bold', color: 'white' }}>Flip Camera</Text>
+        <SafeAreaView style={[styles.container, , isDesktop && styles.desktopFormContainer]}>
+            <View style={styles.cameraContainer}>
+                <CameraView style={styles.cameraView} facing={facing} ref={cameraRef} >
+                    <View style={styles.cameraControls}>
+                        <TouchableOpacity style={styles.flipButton} onPress={toggleCameraFacing}>
+                            <Text style={styles.flipText}>Flip Camera</Text>
                         </TouchableOpacity>
                     </View>
                 </CameraView>
             </View>
-
             <View style={{ padding: 16 }}>
                 <TouchableOpacity
                     style={{
@@ -142,41 +145,92 @@ export default function UploadScreen({ navigation }) {
                     <Text style={{ color: 'white', fontWeight: '600' }}>Capture Photo</Text>
                 </TouchableOpacity>
 
-                {image && (
+                {photoUri && (
                     <Image
-                        source={{ uri: image.uri }}
+                        source={{ uri: photoUri }}
                         style={{ width: '100%', height: 200, borderRadius: 12, marginBottom: 16 }}
                     />
                 )}
 
-                <TextInput
-                    style={{
-                        backgroundColor: 'white',
-                        padding: 16,
-                        borderRadius: 12,
-                        marginBottom: 16,
-                    }}
-                    placeholder="Write a caption..."
-                    value={caption}
-                    onChangeText={setCaption}
-                    multiline
-                />
+                <View style={styles.formContainer}>
+                    <TextInput
+                        style={styles.captionInput}
+                        placeholder="Write a caption..."
+                        value={caption}
+                        onChangeText={setCaption}
+                        multiline
+                    />
 
-                <TouchableOpacity
-                    style={{
-                        backgroundColor: '#3b82f6',
-                        padding: 16,
-                        borderRadius: 12,
-                        alignItems: 'center',
-                    }}
-                    onPress={handleUpload}
-                    disabled={loading}
-                >
-                    <Text style={{ color: 'white', fontWeight: '600' }}>
-                        {loading ? 'Uploading...' : 'Upload Post'}
-                    </Text>
-                </TouchableOpacity>
+                    <TouchableOpacity
+                        style={{
+                            backgroundColor: '#3b82f6',
+                            padding: 16,
+                            borderRadius: 12,
+                            alignItems: 'center',
+                        }}
+                        onPress={handleUpload}
+                        disabled={loading}
+                    >
+                        <Text style={{ color: 'white', fontWeight: '600' }}>
+                            {loading ? 'Uploading...' : 'Upload Post'}
+                        </Text>
+                    </TouchableOpacity>
+                </View>
             </View>
         </SafeAreaView>
     );
 }
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        backgroundColor: '#f3f4f6',
+    },
+    cameraContainer: {
+        flex: 1,
+        justifyContent: 'center',
+    },
+    cameraView: {
+        flex: 1,
+        width: '100%',
+    },
+    cameraControls: {
+        flex: 1,
+        flexDirection: 'row',
+        backgroundColor: 'transparent',
+        margin: 64,
+    },
+    flipButton: {
+        flex: 1,
+        alignSelf: 'flex-end',
+        alignItems: 'center',
+    },
+    flipText: {
+        fontSize: 24,
+        fontWeight: 'bold',
+        color: 'white',
+    },
+    formContainer: {
+        padding: 16,
+    },
+    captionInput: {
+        backgroundColor: 'white',
+        padding: 16,
+        borderRadius: 12,
+        marginBottom: 16,
+    },
+    uploadButton: {
+        backgroundColor: '#3b82f6',
+        padding: 16,
+        borderRadius: 12,
+        alignItems: 'center',
+    },
+    uploadButtonText: {
+        color: 'white',
+        fontWeight: '600',
+    },
+    desktopFormContainer: {
+        width: '50%',
+        alignSelf: 'center',
+    },
+});
